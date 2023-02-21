@@ -14,7 +14,7 @@ app.MapGet("/AddHeader", (HttpResponse response) =>
 
 app.MapPost("/saveProduct", (Product product) =>
 {
-    return product.Code + " - " + product.Name;
+    ProductRepository.Add(product);
 });
 
 app.MapGet("/getProduct/", ([FromQuery] string dateStart, [FromQuery] string dateEnd) =>
@@ -24,7 +24,8 @@ app.MapGet("/getProduct/", ([FromQuery] string dateStart, [FromQuery] string dat
 
 app.MapGet("/getProduct/{code}", ([FromRoute] string code) =>
 {
-    return code;
+    var product = ProductRepository.GetBy(code);
+    return product;
 });
 
 app.MapGet("/getProductbyHeader", (HttpRequest request) =>
@@ -32,7 +33,45 @@ app.MapGet("/getProductbyHeader", (HttpRequest request) =>
     return request.Headers["product-code"].ToString();
 });
 
+app.MapPut("/editproduct", (Product product) =>
+{
+    var productSaved = ProductRepository.GetBy(product.Code);
+    productSaved.Name = product.Name;
+    ProductRepository.Add(productSaved); // save changes to repository
+    return new { Message = "Product updated successfully" }; // return a response
+});
+
+app.MapDelete("/deleteproduct/{code}", ([FromRoute] string code) =>
+{
+    var productSaved = ProductRepository.GetBy(code);
+    ProductRepository.Remove(productSaved);
+});
+
 app.Run();
+
+public static class ProductRepository
+{
+    public static List<Product> Products { get; set; }
+
+    public static void Add(Product product)
+    {
+        if (Products == null)
+        {
+            Products = new List<Product>();
+        }
+        Products.Add(product);
+    }
+
+    public static Product GetBy(string code)
+    {
+        return Products.FirstOrDefault(p => p.Code == code);
+    }
+
+    public static void Remove(Product product)
+    {
+        Products.Remove(product);
+    }
+}
 
 public class Product
 {
