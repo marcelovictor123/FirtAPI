@@ -12,17 +12,17 @@ app.MapGet("/AddHeader", (HttpResponse response) =>
     return new { Name = "Victor", Age = 25 };
 });
 
-app.MapPost("/saveProduct", (Product product) =>
+app.MapPost("/products", (Product product) =>
 {
     ProductRepository.Add(product);
 });
 
-app.MapGet("/getProduct/", ([FromQuery] string dateStart, [FromQuery] string dateEnd) =>
+app.MapGet("/products/", ([FromQuery] string dateStart, [FromQuery] string dateEnd) =>
 {
     return dateStart + " - " + dateEnd;
 });
 
-app.MapGet("/getProduct/{code}", ([FromRoute] string code) =>
+app.MapGet("/products/{code}", ([FromRoute] string code) =>
 {
     var product = ProductRepository.GetBy(code);
     return product;
@@ -33,7 +33,7 @@ app.MapGet("/getProductbyHeader", (HttpRequest request) =>
     return request.Headers["product-code"].ToString();
 });
 
-app.MapPut("/editproduct", (Product product) =>
+app.MapPut("/products", (Product product) =>
 {
     var productSaved = ProductRepository.GetBy(product.Code);
     productSaved.Name = product.Name;
