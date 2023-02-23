@@ -15,6 +15,7 @@ app.MapGet("/AddHeader", (HttpResponse response) =>
 app.MapPost("/products", (Product product) =>
 {
     ProductRepository.Add(product);
+    return Results.Created("/products" + product.Code, product.Code);
 });
 
 app.MapGet("/products/", ([FromQuery] string dateStart, [FromQuery] string dateEnd) =>
@@ -25,7 +26,15 @@ app.MapGet("/products/", ([FromQuery] string dateStart, [FromQuery] string dateE
 app.MapGet("/products/{code}", ([FromRoute] string code) =>
 {
     var product = ProductRepository.GetBy(code);
-    return product;
+    if (product != null)
+    {
+        return Results.Ok(product);
+    }
+    else
+    {
+        return Results.NotFound();
+    }
+
 });
 
 app.MapGet("/getProductbyHeader", (HttpRequest request) =>
@@ -45,6 +54,7 @@ app.MapDelete("/deleteproduct/{code}", ([FromRoute] string code) =>
 {
     var productSaved = ProductRepository.GetBy(code);
     ProductRepository.Remove(productSaved);
+    return Results.Ok();
 });
 
 app.Run();
