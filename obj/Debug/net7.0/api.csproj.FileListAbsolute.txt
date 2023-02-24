@@ -24,3 +24,4 @@ C:\Cursos\C_sharp\.NetWebAPI\api\obj\Debug\net7.0\refint\api.dll
 C:\Cursos\C_sharp\.NetWebAPI\api\obj\Debug\net7.0\api.pdb
 C:\Cursos\C_sharp\.NetWebAPI\api\obj\Debug\net7.0\api.genruntimeconfig.cache
 C:\Cursos\C_sharp\.NetWebAPI\api\obj\Debug\net7.0\ref\api.dll
+C:\Cursos\C_sharp\.NetWebAPI\api\bin\Debug\net7.0\appsettings.Staging.json
