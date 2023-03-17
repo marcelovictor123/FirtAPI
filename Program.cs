@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSqlServer<ApplicationDbContext>(builder.Configuration["Database:SqlServer"]);
@@ -44,9 +45,12 @@ app.MapGet("/products/", ([FromQuery] string dateStart, [FromQuery] string dateE
     return dateStart + " - " + dateEnd;
 });
 
-app.MapGet("/products/{code}", ([FromRoute] string code) =>
+app.MapGet("/products/{id}", ([FromRoute] int id, ApplicationDbContext context) =>
 {
-    var product = ProductRepository.GetBy(code);
+    var product = context.Products
+        .Include(p => p.Category)
+        .Include(p => p.Tags)
+        .Where(p => p.Id == id).First();
     if (product != null)
     {
         return Results.Ok(product);
@@ -63,12 +67,29 @@ app.MapGet("/getProductbyHeader", (HttpRequest request) =>
     return request.Headers["product-code"].ToString();
 });
 
-app.MapPut("/products", (Product product) =>
+app.MapPut("/products/{id}", ([FromRoute] int id, ApplicationDbContext context, ProductDto productDto) =>
 {
-    var productSaved = ProductRepository.GetBy(product.Code);
-    productSaved.Name = product.Name;
-    ProductRepository.Add(productSaved); // save changes to repository
-    return new { Message = "Product updated successfully" }; // return a response
+    var product = context.Products
+       .Include(p => p.Tags)
+       .Where(p => p.Id == id).First();
+    var category = context.Categories.Where(c => c.Id == productDto.CategoryId).First();
+
+    product.Code = productDto.Code;
+    product.Name = productDto.Name;
+    product.Description = productDto.Description;
+    product.Category = category;
+    product.Tags = new List<Tag>();
+    if (productDto.Tags != null)
+    {
+        product.Tags = new List<Tag>();
+        foreach (var item in productDto.Tags)
+        {
+            product.Tags.Add(new Tag { Name = item });
+        }
+    }
+
+    context.SaveChanges();
+    return Results.Ok();
 });
 
 app.MapDelete("/deleteproduct/{code}", ([FromRoute] string code) =>
